@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>중1 수학 : 부채꼴의 중심각, 호, 넓이의 정비례 탐험실</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Pretendard:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-kids {
+      font-family: 'Jua', cursive, sans-serif;
+    }
+    .math-arc {
+      position: relative;
+      display: inline-block;
+      padding-top: 0.32em;
+      margin: 0 0.12em;
+      line-height: 1;
+      vertical-align: -0.05em;
+    }
+    .math-arc::before {
+      content: "";
+      position: absolute;
+      top: 0.02em;
+      left: 1px;
+      right: 1px;
+      height: 0.34em;
+      border-top: 2.2px solid currentColor;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    }
+    .pie-piece {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    .pie-piece:hover {
+      filter: brightness(1.08) drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl shadow-inner">
+          <span>🍕</span>
+        </div>
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-200">교과서 194~195쪽 연계</span>
+          <h1 class="text-lg md:text-xl font-kids tracking-wide">부채꼴의 중심각과 호, 넓이의 정비례</h1>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <nav class="bg-indigo-700 px-4">
+      <div class="max-w-5xl mx-auto flex gap-2 overflow-x-auto py-1 scrollbar-none">
+        <button onclick="switchTab('rotate')" id="tab-rotate" class="tab-btn active px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 bg-slate-50 text-indigo-700 shadow-sm transition">
+          <span>🔄</span> 1. 회전하여 포개기
+        </button>
+        <button onclick="switchTab('fold')" id="tab-fold" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 text-indigo-100 hover:bg-indigo-600/50 transition">
+          <span>📑</span> 2. 종이접기 & 정비례
+        </button>
+        <button onclick="switchTab('problem')" id="tab-problem" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 text-indigo-100 hover:bg-indigo-600/50 transition">
+          <span>✏️</span> 3. 교과서 문제 3 풀이실
+        </button>
+        <button onclick="switchTab('equalchord')" id="tab-equalchord" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 text-indigo-100 hover:bg-indigo-600/50 transition">
+          <span>📐</span> 4. 중심각과 현의 관계
+        </button>
+        <button onclick="switchTab('chord')" id="tab-chord" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 text-indigo-100 hover:bg-indigo-600/50 transition">
+          <span>⚠️</span> 5. 생각 넓히기 (현)
+        </button>
+        <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-4 py-2 rounded-t-lg font-bold text-sm flex items-center gap-1.5 text-indigo-100 hover:bg-indigo-600/50 transition">
+          <span>⭐</span> 6. 스피드 퀴즈
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="max-w-5xl w-full mx-auto p-4 flex-1 flex flex-col gap-4">
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: 회전하여 포개기 (교과서 194쪽 상단 생각 2) -->
+    <!-- ======================================================== -->
+    <section id="section-rotate" class="tab-section flex flex-col lg:flex-row gap-4 flex-1">
+      <!-- Left: Interactive Rotate & Overlay SVG Canvas -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col items-center justify-between relative min-h-[420px]">
+        <div class="w-full flex items-center justify-between mb-2">
+          <div class="text-xs font-bold text-slate-700">
+            <span class="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full font-bold mr-1.5">교과서 194p 생각 2</span>
+            중심각의 크기가 같은 두 부채꼴 회전시키기
+          </div>
+          <button onclick="resetRotate()" class="text-xs text-indigo-600 hover:underline font-semibold flex items-center gap-1">
+            <span>↺</span> 처음 위치로
+          </button>
+        </div>
+
+        <!-- Interactive Rotation Canvas -->
+        <div class="w-full max-w-[340px] aspect-square relative my-auto select-none">
+          <svg id="rotateSvg" viewBox="0 0 400 400" class="w-full h-full drop-shadow-sm overflow-visible">
+            <!-- Circumference Base -->
+            <circle cx="200" cy="200" r="160" fill="#f8fafc" stroke="#64748b" stroke-width="2.5" />
+            <!-- Fixed Reference Sector 1 (기준 부채꼴) -->
+            <g id="fixedSectorLayer"></g>
+            <!-- Rotating Sector 2 (회전 부채꼴) -->
+            <g id="rotatingSectorLayer"></g>
+            <!-- Center O -->
+            <circle cx="200" cy="200" r="6" fill="#1e293b" />
+            <text x="200" y="225" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">O</text>
+            <!-- Overlap Match Badge -->
+            <g id="overlapBadgeLayer"></g>
+          </svg>
+        </div>
+
+        <!-- Controls: Rotate Slider & Auto-Animate Button -->
+        <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700">부채꼴 회전 각도: <span id="rotateDegText" class="text-indigo-600 font-extrabold text-sm">0°</span></span>
+            <button onclick="autoRotateOverlay()" id="btnAutoRotate" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+              <span id="autoRotateIcon">▶</span>
+              <span id="autoRotateBtnText">빙글 회전하여 포개기</span>
+            </button>
+          </div>
+          <div class="flex items-center gap-3">
+            <input type="range" id="rotateSlider" min="0" max="115" value="0" step="1" oninput="setSectorRotation(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold px-1">
+            <span>떨어져 있는 상태 (0°)</span>
+            <span class="text-indigo-600 font-bold">완전히 포개어지는 지점 (115°) &rarr;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Overlap Verification & Explanation -->
+      <div class="w-full lg:w-96 flex flex-col gap-3">
+        <!-- Live Status Card -->
+        <div class="bg-gradient-to-br from-rose-50 to-indigo-50 border border-rose-100 rounded-2xl p-4 shadow-sm">
+          <div class="text-xs font-extrabold text-rose-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+            <span>📑</span> 포개어짐 상태 확인
+          </div>
+          <h2 id="overlapStatusTitle" class="text-lg font-kids text-slate-900 mb-2">
+            두 부채꼴이 떨어져 있어요!
+          </h2>
+
+          <div class="space-y-2 text-xs">
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span class="text-rose-500">📐</span> 중심각의 크기
+              </span>
+              <span class="text-xs font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
+                둘 다 45°로 동일
+              </span>
+            </div>
+
+            <div id="checkArcCard" class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs transition">
+              <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span class="text-amber-500">🌈</span> 호의 길이 포갬
+              </span>
+              <span id="checkArcBadge" class="text-xs font-extrabold text-slate-400">
+                회전 대기 중...
+              </span>
+            </div>
+
+            <div id="checkAreaCard" class="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs transition">
+              <span class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span class="text-emerald-500">🍕</span> 부채꼴 넓이 포갬
+              </span>
+              <span id="checkAreaBadge" class="text-xs font-extrabold text-slate-400">
+                회전 대기 중...
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Textbook Key Rule Box (포갠 후에만 확인 가능하도록 잠금 시스템 적용) -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-xs sm:text-sm mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><span>📖</span> 교과서 194쪽 핵심 탐구 원리</span>
+              <span id="rotateLockBadge" class="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">포개기 대기 중 🔒</span>
+            </h3>
+
+            <!-- Locked State Card (포개기 전) -->
+            <div id="rotateLockedBox" class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center flex flex-col items-center justify-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg shadow-xs">
+                <span>🔒</span>
+              </div>
+              <div class="text-xs font-bold text-slate-800" id="rotateLockTitle">핵심 원리가 잠겨있어요! 🔒</div>
+              <p class="text-[11px] text-slate-500 leading-relaxed" id="rotateLockDesc">
+                왼쪽 슬라이더나 <strong>[빙글 회전하여 포개기]</strong> 버튼으로<br>
+                중심각이 같은 두 부채꼴을 먼저 <strong>100% 포개어 보세요!</strong>
+              </p>
+              <button id="btnUnlockRotate" onclick="unlockRotateConclusion()" disabled class="mt-1 px-4 py-2 bg-slate-200 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed transition flex items-center gap-1.5">
+                <span>🔑</span>
+                <span id="btnUnlockRotateText">완전히 포갠 후 확인 가능</span>
+              </button>
+            </div>
+
+            <!-- Unlocked State Card (100% 포갠 후 확인 클릭 시 공개) -->
+            <div id="rotateUnlockedBox" class="hidden text-xs text-slate-600 space-y-2.5 leading-relaxed animate-fadeIn">
+              <p class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                한 원에서 <strong>중심각의 크기가 같은 두 부채꼴</strong>은 원의 중심 O를 축으로 회전시키면 <strong>서로 완전히 포갤 수 있습니다(합동).</strong>
+              </p>
+              <ul class="space-y-1.5 text-slate-700">
+                <li class="flex items-start gap-1.5">
+                  <span class="text-indigo-600 font-bold">&check;</span>
+                  <span>따라서 두 부채꼴의 <strong>호의 길이는 서로 같다!</strong></span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="text-indigo-600 font-bold">&check;</span>
+                  <span>따라서 두 부채꼴의 <strong>넓이도 서로 완전히 같다!</strong></span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                  <span class="text-slate-500 font-bold">&bull;</span>
+                  <span class="text-[11px] text-slate-500">역으로 호의 길이나 넓이가 같으면 중심각의 크기도 서로 같습니다.</span>
+                </li>
+              </ul>
+              <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-900 font-bold text-center">
+                ✨ 직접 포개어 봄으로써 두 부채꼴의 호의 길이와 넓이가 같음을 직접 확인했습니다!
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <span id="rotateFooterHint">회전 슬라이더를 115°까지 끝까지 밀어보세요!</span>
+            <button onclick="autoRotateOverlay()" id="quickOverlayBtn" class="text-indigo-600 font-bold hover:underline">
+              원클릭 포개기 &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: 종이접기 & 정비례 탐구 (교과서 194쪽 함께해요) -->
+    <!-- ======================================================== -->
+    <section id="section-fold" class="tab-section hidden flex flex-col lg:flex-row gap-4 flex-1">
+      <!-- Left: Interactive Folded Circle SVG Canvas -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col items-center justify-between relative min-h-[420px]">
+        <div class="w-full flex items-center justify-between mb-1">
+          <div class="text-xs font-bold text-slate-700 flex flex-wrap items-center gap-1.5">
+            <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">교과서 194p 함께해요</span>
+            <span>원 모양 종이를 3번 접어 나눈 8개 부채꼴</span>
+          </div>
+          <button onclick="resetSlices()" class="text-xs text-indigo-600 hover:underline font-semibold flex items-center gap-1">
+            <span>↺</span> 1조각으로 초기화
+          </button>
+        </div>
+
+        <!-- 360° ÷ 8 = 45° 수학적 원리 배너 추가 -->
+        <div class="w-full bg-indigo-50/80 border border-indigo-200/70 rounded-xl px-3 py-1.5 mb-2 text-xs flex items-center justify-between text-indigo-900">
+          <span class="flex items-center gap-1.5 font-bold">
+            <span class="text-indigo-600 text-sm">💡</span>
+            <span>원 전체(<strong class="text-indigo-700">360°</strong>)를 똑같이 8개로 나누었으므로:</span>
+          </span>
+          <span class="bg-white px-2 py-0.5 rounded-lg border border-indigo-200 font-extrabold text-rose-600 shadow-xs">
+            1조각 중심각 = 360° &divide; 8 = 45°
+          </span>
+        </div>
+
+        <!-- Interactive 8 Slices SVG Canvas -->
+        <div class="w-full max-w-[340px] aspect-square relative my-auto select-none">
+          <svg id="slicesSvg" viewBox="0 0 400 400" class="w-full h-full drop-shadow-sm overflow-visible">
+            <circle cx="200" cy="200" r="160" fill="#f8fafc" stroke="#64748b" stroke-width="2.5" />
+            <g id="slicesContainer"></g>
+            <g id="sliceLabelsContainer"></g>
+            <g id="circleLetters"></g>
+            <circle cx="200" cy="200" r="5" fill="#1e293b" />
+            <text x="200" y="222" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">O</text>
+          </svg>
+        </div>
+
+        <!-- Controls: Slices Slider -->
+        <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>부채꼴 조각 수: <span id="sliceCountBadge" class="text-indigo-600 font-extrabold text-sm">1조각 (45°)</span></span>
+            <div class="flex items-center gap-1">
+              <button onclick="changeSlice(-1)" class="w-6 h-6 rounded bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100">-</button>
+              <button onclick="changeSlice(1)" class="w-6 h-6 rounded bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100">+</button>
+            </div>
+          </div>
+          <input type="range" id="sliceSlider" min="1" max="8" value="1" step="1" oninput="setSliceCount(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+          <div class="flex justify-between text-[10px] text-slate-400 font-bold px-1">
+            <span>1조각(45°)</span>
+            <span>2조각(90°)</span>
+            <span>3조각(135°)</span>
+            <span>4조각(180°)</span>
+            <span>...</span>
+            <span>8조각(360°)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Real-time Multiplier Table & Concept -->
+      <div class="w-full lg:w-96 flex flex-col gap-3">
+        <!-- Live Multiplier Card -->
+        <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+              <span>📊</span> 배수 실시간 관찰
+            </span>
+            <span class="text-[11px] bg-white/80 border border-indigo-200 text-indigo-700 px-2 py-0.5 rounded-full font-bold">
+              예시: 1조각 = 호 3cm, 넓이 6cm²
+            </span>
+          </div>
+          <h2 class="text-xl font-kids text-slate-900 mb-3">
+            기본 부채꼴의 <span id="kMultiplier" class="text-indigo-600 underline font-black">1배</span>
+          </h2>
+
+          <div class="space-y-2 text-xs">
+            <!-- 1. Central Angle -->
+            <div class="bg-white p-3 rounded-xl border border-indigo-100 flex items-center justify-between shadow-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-2">
+                <span class="text-rose-500">📐</span> 중심각의 크기
+              </span>
+              <div class="text-right">
+                <span id="metricAngle" class="text-base font-extrabold text-rose-600">45°</span>
+                <span id="metricAngleRatio" class="text-[11px] text-slate-400 block">(360° &divide; 8 = 45° &times; 1)</span>
+              </div>
+            </div>
+
+            <!-- 2. Arc Length -->
+            <div class="bg-white p-3 rounded-xl border border-indigo-100 flex items-center justify-between shadow-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-2">
+                <span class="text-amber-500">🌈</span> 호의 길이 (예시)
+              </span>
+              <div class="text-right">
+                <span id="metricArc" class="text-base font-extrabold text-amber-600">3 cm</span>
+                <span id="metricArcRatio" class="text-[11px] text-slate-400 block">(3 cm &times; 1배)</span>
+              </div>
+            </div>
+
+            <!-- 3. Sector Area -->
+            <div class="bg-white p-3 rounded-xl border border-indigo-100 flex items-center justify-between shadow-xs">
+              <span class="font-bold text-slate-700 flex items-center gap-2">
+                <span class="text-emerald-500">🍕</span> 부채꼴 넓이 (예시)
+              </span>
+              <div class="text-right">
+                <span id="metricArea" class="text-base font-extrabold text-emerald-600">6 cm²</span>
+                <span id="metricAreaRatio" class="text-[11px] text-slate-400 block">(6 cm² &times; 1배)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mathematical Conclusion Box -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-xs sm:text-sm mb-2 flex items-center justify-between">
+              <span class="flex items-center gap-1.5"><span>🎓</span> 교과서 194쪽 공식 정리</span>
+              <span id="foldProgressBadge" class="text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">탐구 진행: 1 / 8</span>
+            </h3>
+
+            <!-- Locked State Card (Before exploring all 8 slices) -->
+            <div id="foldLockedBox" class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center flex flex-col items-center justify-center gap-2">
+              <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg shadow-xs">
+                <span>🔒</span>
+              </div>
+              <div class="text-xs font-bold text-slate-800" id="foldLockTitle">공식 결론이 잠겨있어요! 🔒</div>
+              <p class="text-[11px] text-slate-500 leading-relaxed" id="foldLockDesc">
+                왼쪽 원에서 <strong>8개의 부채꼴 조각</strong>을 직접 클릭하며<br>
+                조각 수에 따라 중심각과 호, 넓이가 어떻게 변하는지 확인해 보세요.
+              </p>
+              <!-- Progress bar -->
+              <div class="w-full bg-slate-200 rounded-full h-2 mt-1 overflow-hidden">
+                <div id="foldProgressBar" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 12.5%;"></div>
+              </div>
+              <button id="btnUnlockFold" onclick="unlockFoldConclusion()" disabled class="mt-2 px-4 py-2 bg-slate-300 text-slate-500 text-xs font-bold rounded-xl shadow-none cursor-not-allowed transition flex items-center gap-1.5">
+                <span>🔑</span>
+                <span id="btnUnlockFoldText">8조각 모두 탐구 후 확인 가능</span>
+              </button>
+            </div>
+
+            <!-- Unlocked State Card (Shown after student completes exploring all 8 slices) -->
+            <div id="foldUnlockedBox" class="hidden text-xs text-slate-600 space-y-2 leading-relaxed animate-fadeIn">
+              <p>
+                한 원에서 중심각의 크기가 <strong>2배, 3배, 4배...</strong>가 되면, 호의 길이와 넓이도 똑같이 <strong>2배, 3배, 4배...</strong>가 됩니다.
+              </p>
+              <div class="p-3 bg-gradient-to-r from-indigo-50 to-emerald-50 border-2 border-indigo-200 rounded-xl font-bold text-indigo-950 text-center shadow-xs">
+                ✨ "한 원에서 부채꼴의 호의 길이와 넓이는 각각 중심각의 크기에 <span class="text-rose-600 underline font-black">정비례</span>한다!"
+              </div>
+              <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 font-semibold">
+                💡 8개 조각을 모두 확인한 여러분! 조각 수가 늘어날 때마다 중심각, 호의 길이, 넓이가 모두 동일한 배수로 늘어나는 규칙을 직접 발견했습니다.
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 text-[11px] text-slate-400 border-t border-slate-100 flex items-center justify-between">
+            <span id="foldFooterHint">슬라이더를 올리거나 조각을 눌러 8조각까지 모두 채워보세요!</span>
+            <button onclick="relockFoldConclusion()" id="btnRelockFold" class="hidden text-xs text-slate-500 hover:text-indigo-600 font-bold">
+              <span>↺</span> 다시 잠그기
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: 교과서 문제 3 풀이실 (교과서 195쪽) -->
+    <!-- ======================================================== -->
+    <section id="section-problem" class="tab-section hidden flex flex-col gap-4 flex-1">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Problem 3-(1): Arc Length & Angle Proportion -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3 border-b pb-2">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-800">문제 3-(1) 호의 길이 x 구하기</span>
+              <span class="text-xs text-slate-400">교과서 195쪽</span>
+            </div>
+
+            <!-- Problem Diagram (SVG) -->
+            <div class="w-full max-w-[260px] aspect-square mx-auto mb-3">
+              <svg viewBox="0 0 300 300" class="w-full h-full select-none">
+                <circle cx="150" cy="150" r="110" fill="#f8fafc" stroke="#334155" stroke-width="2.5" />
+                <circle cx="150" cy="150" r="4" fill="#0f172a" />
+                <text x="150" y="168" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">O</text>
+
+                <!-- Sector 1: 50 deg, arc = x cm -->
+                <path d="M 150 150 L 40 150 A 110 110 0 0 1 79.29 65.73 Z" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="2" />
+                <path d="M 150 150 L 115 150 A 35 35 0 0 1 127.5 123.18 Z" fill="rgba(244, 63, 94, 0.25)" />
+                <text x="108" y="142" font-size="12" font-weight="bold" fill="#e11d48">50°</text>
+                <path d="M 33 150 A 117 117 0 0 1 74.9 60.3" fill="none" stroke="#e11d48" stroke-width="2" stroke-dasharray="3 2" />
+                <text x="44" y="102" font-size="14" font-weight="extrabold" fill="#e11d48">x cm</text>
+
+                <!-- Sector 2: 150 deg, arc = 12 cm -->
+                <path d="M 150 150 L 187.6 46.7 A 110 110 0 0 1 169.1 258.3 Z" fill="rgba(79, 70, 229, 0.15)" stroke="#4f46e5" stroke-width="2" />
+                <path d="M 150 150 L 160.2 121.8 A 30 30 0 0 1 155.2 179.5 Z" fill="rgba(79, 70, 229, 0.25)" />
+                <text x="175" y="155" font-size="12" font-weight="bold" fill="#4338ca">150°</text>
+                <text x="272" y="156" font-size="14" font-weight="extrabold" fill="#4338ca" text-anchor="middle">12 cm</text>
+              </svg>
+            </div>
+
+            <!-- Locked State Box (Before Answering) -->
+            <div id="probLockedBox1" class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center flex flex-col items-center justify-center gap-1.5">
+              <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm">
+                <span>🔒</span>
+              </div>
+              <div class="text-xs font-bold text-slate-700">비례식과 풀이가 숨겨져 있어요!</div>
+              <p class="text-[11px] text-slate-500">
+                그림을 보고 <span class="font-bold italic text-indigo-600">x</span>의 값을 먼저 계산하여 아래에 입력한 뒤,<br>
+                <strong class="text-indigo-600">[정답 확인]</strong>을 누르면 비례식과 이유가 공개됩니다.
+              </p>
+            </div>
+
+            <!-- Unlocked Solution Box (Revealed after correct answer) -->
+            <div id="probUnlockedBox1" class="hidden space-y-2.5 animate-fadeIn">
+              <!-- 왜 비례식을 세울까? 핵심 이유 설명 -->
+              <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed">
+                <div class="font-extrabold flex items-center gap-1.5 mb-1 text-amber-950">
+                  <span class="text-base">💡</span> 왜 비례식을 세워서 풀어야 할까요?
+                </div>
+                한 원에서 <strong>부채꼴의 호의 길이는 중심각의 크기에 정비례</strong>합니다.<br>
+                따라서 <strong>(중심각의 크기의 비) = (호의 길이의 비)</strong>가 항상 일정하게 성립하므로, 비례식을 세우면 미지수 <span class="font-bold italic text-amber-950">x</span>를 정확하고 간단하게 구할 수 있습니다!
+              </div>
+
+              <!-- 세워진 비례식 및 단계별 풀이 -->
+              <div class="bg-indigo-50/70 p-3 rounded-xl border border-indigo-200 text-xs text-slate-700 space-y-1.5">
+                <div class="font-bold text-indigo-900 flex items-center justify-between">
+                  <span class="flex items-center gap-1.5"><span class="text-indigo-600 font-extrabold">＝</span> 완성된 비례식과 풀이</span>
+                  <span class="text-[11px] bg-indigo-200/60 text-indigo-800 px-2 py-0.5 rounded font-bold">정비례 성질</span>
+                </div>
+                <div class="bg-white py-2 rounded-lg border border-indigo-100 font-mono text-center text-sm font-bold text-indigo-700 shadow-2xs">
+                  50° : 150° ＝ x : 12
+                </div>
+                <p class="text-[11px] text-slate-600 leading-relaxed pt-1">
+                  • <strong>배수 관계:</strong> 중심각이 50°에서 150°로 <strong class="text-indigo-700">3배</strong>가 되었으므로, 호의 길이도 똑같이 3배가 되어야 합니다.<br>
+                  • <strong>계산:</strong> 3 &times; <span class="italic font-bold">x</span> ＝ 12 &nbsp;&xrarr;&nbsp; <span class="italic font-bold">x</span> ＝ 12 &divide; 3 ＝ <strong class="text-indigo-700 text-sm">4</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <input type="number" id="inputAns1" placeholder="x의 값을 입력하세요 (숫자)" class="flex-1 p-2.5 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+              <button onclick="checkProblem1()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm">
+                정답 확인
+              </button>
+            </div>
+            <div id="probFeedback1" class="min-h-[28px] text-xs font-bold flex items-center"></div>
+          </div>
+        </div>
+
+        <!-- Problem 3-(2): Area Proportion & Angle finding -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3 border-b pb-2">
+              <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">문제 3-(2) 중심각 x 구하기</span>
+              <span class="text-xs text-slate-400">교과서 195쪽</span>
+            </div>
+
+            <!-- Problem Diagram (SVG) -->
+            <div class="w-full max-w-[260px] aspect-square mx-auto mb-3">
+              <svg viewBox="0 0 300 300" class="w-full h-full select-none">
+                <circle cx="150" cy="150" r="110" fill="#f8fafc" stroke="#334155" stroke-width="2.5" />
+                <circle cx="150" cy="150" r="4" fill="#0f172a" />
+                <text x="150" y="168" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">O</text>
+
+                <!-- Sector 1: 30 deg, Area = 5 cm² -->
+                <path d="M 150 150 L 235 220 A 110 110 0 0 1 195 250 Z" fill="rgba(245, 158, 11, 0.3)" stroke="#d97706" stroke-width="2" />
+                <text x="180" y="185" font-size="11" font-weight="bold" fill="#b45309">30°</text>
+                <text x="215" y="240" font-size="13" font-weight="extrabold" fill="#b45309">5 cm²</text>
+
+                <!-- Sector 2: x deg, Area = 20 cm² -->
+                <path d="M 150 150 L 55 95 A 110 110 0 0 1 245 95 Z" fill="rgba(16, 185, 129, 0.25)" stroke="#059669" stroke-width="2" />
+                <path d="M 150 150 L 125 135 A 30 30 0 0 1 175 135 Z" fill="rgba(16, 185, 129, 0.4)" />
+                <text x="150" y="130" font-size="14" font-weight="extrabold" fill="#047857" text-anchor="middle">x°</text>
+                <text x="150" y="80" font-size="15" font-weight="extrabold" fill="#047857" text-anchor="middle">20 cm²</text>
+              </svg>
+            </div>
+
+            <!-- Locked State Box (Before Answering) -->
+            <div id="probLockedBox2" class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center flex flex-col items-center justify-center gap-1.5">
+              <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-sm">
+                <span>🔒</span>
+              </div>
+              <div class="text-xs font-bold text-slate-700">비례식과 풀이가 숨겨져 있어요!</div>
+              <p class="text-[11px] text-slate-500">
+                그림을 보고 중심각 <span class="font-bold italic text-emerald-600">x</span>의 값을 계산하여 아래에 입력한 뒤,<br>
+                <strong class="text-emerald-600">[정답 확인]</strong>을 누르면 비례식과 이유가 공개됩니다.
+              </p>
+            </div>
+
+            <!-- Unlocked Solution Box (Revealed after correct answer) -->
+            <div id="probUnlockedBox2" class="hidden space-y-2.5 animate-fadeIn">
+              <!-- 왜 비례식을 세울까? 핵심 이유 설명 -->
+              <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed">
+                <div class="font-extrabold flex items-center gap-1.5 mb-1 text-amber-950">
+                  <span class="text-base">💡</span> 왜 비례식을 세워서 풀어야 할까요?
+                </div>
+                한 원에서 <strong>부채꼴의 넓이 역시 중심각의 크기에 정비례</strong>합니다.<br>
+                따라서 <strong>(중심각의 크기의 비) = (부채꼴의 넓이의 비)</strong>가 정확히 일치하므로, 비례식을 세워 중심각 <span class="font-bold italic text-amber-950">x</span>를 풀 수 있습니다!
+              </div>
+
+              <!-- 세워진 비례식 및 단계별 풀이 -->
+              <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 text-xs text-slate-700 space-y-1.5">
+                <div class="font-bold text-emerald-900 flex items-center justify-between">
+                  <span class="flex items-center gap-1.5"><span class="text-emerald-600 font-extrabold">＝</span> 완성된 비례식과 풀이</span>
+                  <span class="text-[11px] bg-emerald-200/60 text-emerald-800 px-2 py-0.5 rounded font-bold">정비례 성질</span>
+                </div>
+                <div class="bg-white py-2 rounded-lg border border-emerald-100 font-mono text-center text-sm font-bold text-emerald-700 shadow-2xs">
+                  30° : x° ＝ 5 cm² : 20 cm²
+                </div>
+                <p class="text-[11px] text-slate-600 leading-relaxed pt-1">
+                  • <strong>배수 관계:</strong> 넓이가 5 cm²에서 20 cm²로 <strong class="text-emerald-700">4배</strong>가 되었으므로, 중심각도 똑같이 4배가 되어야 합니다.<br>
+                  • <strong>계산:</strong> <span class="italic font-bold">x</span> ＝ 30° &times; 4 ＝ <strong class="text-emerald-700 text-sm">120</strong> (즉, 120°)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t flex flex-col gap-2">
+            <div class="flex items-center gap-2">
+              <input type="number" id="inputAns2" placeholder="x(도)의 값을 입력하세요 (숫자)" class="flex-1 p-2.5 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-400 focus:outline-none">
+              <button onclick="checkProblem2()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm">
+                정답 확인
+              </button>
+            </div>
+            <div id="probFeedback2" class="min-h-[28px] text-xs font-bold flex items-center"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: 중심각과 현의 관계 탐구 (교과서 195쪽 가운데) -->
+    <!-- ======================================================== -->
+    <section id="section-equalchord" class="tab-section hidden flex flex-col lg:flex-row gap-4 flex-1">
+      <!-- Left: Interactive Equal Chord SVG Canvas -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col items-center justify-between relative min-h-[420px]">
+        <!-- Top Toolbar with Relocated Measurement Dashboard -->
+        <div class="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-100">
+          <div class="flex flex-col gap-1">
+            <div class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">교과서 195p 탐구</span>
+              <span>중심각과 현의 관계 관찰</span>
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div id="topValueBadgeWrap" class="px-2.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700 flex items-center gap-1 shadow-2xs">
+                <span id="topValueIcon">📐</span>
+                <span id="topValueLabel" class="text-slate-600">중심각:</span>
+                <span id="topAngleLiveBadge" class="text-indigo-900 font-extrabold text-sm">60°</span>
+              </div>
+              <button onclick="toggleAngleAutoChange()" id="btnAutoAngleChange" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs" title="자동으로 크기가 변하는 모습을 재생합니다">
+                <span id="autoAngleIcon">▶</span>
+                <span id="autoAngleText">각도 자동 변화</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 지정된 위치: 실시간 중심각 & 현의 길이 듀얼 비교 보드 -->
+          <div class="w-full sm:w-auto flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 rounded-xl shadow-2xs">
+            <!-- Sector AOB Measurement -->
+            <div class="px-2.5 py-1 bg-white rounded-lg border border-indigo-200 flex items-center gap-2 shadow-2xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>
+              <div class="text-left">
+                <div class="text-[10px] font-bold text-slate-500 leading-tight">부채꼴 AOB (<span class="curAngText text-indigo-600 font-extrabold">60°</span>)</div>
+                <div class="text-xs font-black text-indigo-700 leading-tight">현 AB: <span id="lengthABVal">10.0 cm</span></div>
+              </div>
+            </div>
+
+            <span class="text-slate-400 font-black text-sm">＝</span>
+
+            <!-- Sector COD Measurement -->
+            <div class="px-2.5 py-1 bg-white rounded-lg border border-emerald-200 flex items-center gap-2 shadow-2xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
+              <div class="text-left">
+                <div class="text-[10px] font-bold text-slate-500 leading-tight">부채꼴 COD (<span class="curAngText text-emerald-600 font-extrabold">60°</span>)</div>
+                <div class="text-xs font-black text-emerald-700 leading-tight">현 CD: <span id="lengthCDVal">10.0 cm</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Canvas -->
+        <div class="w-full max-w-[350px] aspect-square relative my-auto select-none">
+          <svg id="equalChordSvg" viewBox="0 0 400 400" class="w-full h-full overflow-visible">
+            <circle cx="200" cy="200" r="160" fill="#f8fafc" stroke="#64748b" stroke-width="2.5" />
+            <g id="equalChordShapesLayer"></g>
+            <circle cx="200" cy="200" r="5" fill="#1e293b" />
+            <text x="200" y="222" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">O</text>
+          </svg>
+        </div>
+
+        <!-- Central Angle Slider for Both Sectors -->
+        <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span id="equalControlTitle">두 부채꼴의 중심각 크기: <span id="equalAngleLabel" class="text-indigo-600 text-sm font-extrabold">60°</span></span>
+            <span id="equalControlHint" class="text-[11px] text-slate-400">슬라이더로 각도를 변경해보세요</span>
+          </div>
+          <input type="range" id="equalAngleSlider" min="30" max="90" value="60" step="5" oninput="updateEqualChordSim(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+          <div id="equalSliderTicks" class="flex justify-between text-[10px] text-slate-400 font-bold px-1">
+            <span>30°</span>
+            <span>45°</span>
+            <span>60°</span>
+            <span>75°</span>
+            <span>90°</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Detailed Mathematical Proof Cards -->
+      <div class="w-full lg:w-96 flex flex-col gap-3">
+        <!-- Interactive Mode Switcher -->
+        <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-extrabold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🔍</span> 양방향 성질 탐구 모드
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <button onclick="setEqualChordMode('angleToChord')" id="btnModeAngle" class="px-2.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow-2xs transition text-center">
+              ① 중심각 ➔ 현 같음
+            </button>
+            <button onclick="setEqualChordMode('chordToAngle')" id="btnModeChord" class="px-2.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-center">
+              ② 현 같음 ➔ 중심각 (역)
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-600 leading-relaxed bg-white/80 p-2.5 rounded-xl border border-indigo-100">
+            💡 왼쪽 캔버스 상단에서 <strong>부채꼴 AOB와 COD의 중심각 및 현의 길이</strong>가 실시간으로 항상 정확히 일치(＝)하는 것을 바로 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <!-- Textbook Core Law Box -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col justify-between">
+          <div class="space-y-2 text-xs text-slate-600 leading-relaxed">
+            <h4 class="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+              <span>📖</span> 교과서 195쪽 핵심 정리
+            </h4>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <p class="font-bold text-indigo-950">
+                1. 한 원에서 중심각의 크기가 같은 두 현의 길이는 서로 같다.
+              </p>
+              <p class="text-[11px] text-slate-500">
+                (이유: 두 부채꼴의 반지름과 중심각이 같으므로 △AOB와 △COD는 <strong>SAS 합동</strong>이 되어 현 AB = 현 CD)
+              </p>
+              <hr class="border-slate-200 my-1">
+              <p class="font-bold text-emerald-950">
+                2. (역) 한 원에서 길이가 같은 두 현에 대한 중심각의 크기도 서로 같다.
+              </p>
+              <p class="text-[11px] text-slate-500">
+                (이유: 반지름과 현의 길이가 모두 같으므로 <strong>SSS 합동</strong>이 되어 ∠AOB = ∠COD)
+              </p>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 text-[11px] text-slate-400 border-t border-slate-100 flex items-center justify-between">
+            <span>하단 슬라이더나 [각도 자동 변화] 버튼으로 확인해 보세요!</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 5: 생각 넓히기 (현은 정비례할까?) - 교과서 195쪽 하단 -->
+    <!-- ======================================================== -->
+    <section id="section-chord" class="tab-section hidden flex flex-col lg:flex-row gap-4 flex-1">
+      <!-- Left: Interactive Triangle / Chord Simulator -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col items-center justify-between relative min-h-[420px]">
+        <div class="w-full flex items-center justify-between mb-2">
+          <div class="text-xs font-bold text-slate-700">
+            <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold mr-1">교과서 195p 탐구</span>
+            중심각의 크기가 2배일 때 현의 길이 비교하기
+          </div>
+          <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+            ⚠️ 핵심 오개념 주의!
+          </span>
+        </div>
+
+        <!-- Chord Simulation SVG Canvas -->
+        <div class="w-full max-w-[350px] aspect-square relative my-auto select-none">
+          <svg id="chordSvg" viewBox="0 0 400 400" class="w-full h-full overflow-visible">
+            <circle cx="200" cy="200" r="160" fill="#f8fafc" stroke="#64748b" stroke-width="2.5" />
+            <circle cx="200" cy="200" r="5" fill="#1e293b" />
+            <text x="200" y="185" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">O</text>
+            <g id="chord-dynamic-layer"></g>
+          </svg>
+        </div>
+
+        <!-- Central Angle Stepper -->
+        <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>부채꼴 1개의 중심각 크기: <span id="chordAngleLabel" class="text-indigo-600 text-sm font-extrabold">45°</span></span>
+            <span class="text-[11px] text-slate-500">2배 중심각 = <span id="doubleAngleLabel" class="font-bold text-rose-600">90°</span></span>
+          </div>
+          <input type="range" id="chordAngleSlider" min="20" max="80" value="45" step="5" oninput="updateChordSim(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+        </div>
+      </div>
+
+      <!-- Right: Detailed Mathematical Proof & Comparison with OX Quiz -->
+      <div class="w-full lg:w-96 flex flex-col gap-3">
+        <!-- Live Length Comparison Board -->
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 shadow-sm">
+          <h3 class="text-sm font-kids text-slate-900 mb-2 flex items-center justify-between">
+            <span>📏 호 vs 현의 길이 비교 결과</span>
+            <span class="text-[11px] bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded-full font-bold">실제 측정값</span>
+          </h3>
+
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-white/90 rounded-xl border border-amber-200 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-slate-800 block">호의 길이 (호 <span class="math-arc font-bold">AC</span>)</span>
+                <span class="text-[11px] text-emerald-600 font-semibold">호 <span class="math-arc">AB</span> + 호 <span class="math-arc">BC</span> = 정확히 2배</span>
+              </div>
+              <span id="compArcVal" class="text-base font-extrabold text-emerald-600">2.00 배</span>
+            </div>
+
+            <div class="p-2.5 bg-white/90 rounded-xl border border-rose-200 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-slate-800 block">현의 길이 (선분 AC)</span>
+                <span class="text-[11px] text-rose-600 font-semibold">선분 AB + 선분 BC 보다 작음!</span>
+              </div>
+              <span id="compChordVal" class="text-base font-extrabold text-rose-600">1.41 배</span>
+            </div>
+          </div>
+
+          <!-- OX Quiz Container (결론을 바로 말하지 않고 퀴즈로 풀도록 변경) -->
+          <div id="chordQuizBox" class="mt-3 p-3 bg-white rounded-xl border-2 border-amber-300 shadow-sm flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                <span>🤔</span> <strong>[생각 OX 퀴즈]</strong>
+              </span>
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">탐구 질문</span>
+            </div>
+            <p class="text-xs text-slate-800 font-semibold leading-relaxed">
+              "한 원에서 부채꼴의 중심각의 크기가 2배가 되면, <strong>현의 길이도 2배가 될까요? (현도 정비례할까?)</strong>"
+            </p>
+            <div class="grid grid-cols-2 gap-2 mt-1">
+              <button onclick="checkChordOX('O')" id="btnChordO" class="py-2.5 bg-slate-50 hover:bg-rose-50 border-2 border-slate-200 hover:border-rose-400 rounded-xl font-kids text-base text-slate-700 hover:text-rose-600 transition flex items-center justify-center gap-1.5 shadow-2xs">
+                <span>⭕ 2배가 된다 (O)</span>
+              </button>
+              <button onclick="checkChordOX('X')" id="btnChordX" class="py-2.5 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-200 hover:border-emerald-400 rounded-xl font-kids text-base text-slate-700 hover:text-emerald-600 transition flex items-center justify-center gap-1.5 shadow-2xs">
+                <span>❌ 2배가 안 된다 (X)</span>
+              </button>
+            </div>
+            <div id="chordOXFeedback" class="min-h-[22px] text-[11px] font-bold text-slate-500 text-center flex items-center justify-center">
+              위의 실제 측정값 배수를 살펴보고 O 또는 X를 선택해 보세요!
+            </div>
+          </div>
+
+          <!-- Unlocked Conclusion Badge (퀴즈 맞춘 후 공개) -->
+          <div id="chordConclusionBadge" class="hidden mt-2.5 p-2.5 bg-rose-100 border-2 border-rose-300 rounded-xl text-rose-950 text-xs font-extrabold text-center animate-fadeIn shadow-xs">
+            🎉 <strong>정답 확인!</strong> 현의 길이는 중심각의 크기에 <span class="underline decoration-rose-500 font-black text-rose-700">정비례하지 않습니다!</span>
+          </div>
+        </div>
+
+        <!-- Triangle Inequality Step-by-Step Reason (기본 잠금, 퀴즈 통과 시 오픈) -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col justify-between">
+          <!-- Locked explanation box -->
+          <div id="chordReasonLocked" class="my-auto py-6 text-center flex flex-col items-center justify-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-lg">
+              🔒
+            </div>
+            <div class="text-xs font-bold text-slate-700">이유 해설이 잠겨있어요!</div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+              위의 <strong>OX 퀴즈</strong>를 먼저 풀어보세요.<br>정답을 맞히면 삼각형의 성질을 이용한 증명이 열립니다.
+            </p>
+          </div>
+
+          <!-- Unlocked explanation content -->
+          <div id="chordReasonUnlocked" class="hidden text-xs text-slate-600 space-y-2 leading-relaxed animate-fadeIn">
+            <h4 class="font-bold text-slate-900 text-xs sm:text-sm mb-2 flex items-center gap-1.5">
+              <span>💡</span> 왜 2배가 되지 않고 더 작을까요?
+            </h4>
+            <p>
+              삼각형 ABC에서 <strong>삼각형의 두 변의 길이의 합은 나머지 한 변의 길이보다 항상 큽니다</strong> (삼각형의 형성 조건).
+            </p>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 font-mono text-center text-xs font-bold text-slate-800">
+              (현 AC) &lt; (현 AB) + (현 BC)
+            </div>
+            <p>
+              현 AB와 현 BC의 길이는 서로 같으므로:<br>
+              &rarr; <strong>(현 AC) &lt; 2 &times; (현 AB)</strong><br>
+              즉, 중심각이 2배가 되어도 현의 길이는 <strong>2배보다 무조건 작아집니다.</strong>
+            </p>
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <span>💡 단, 중심각의 크기가 같으면 현의 길이는 서로 같습니다!</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 5: 스피드 비례 퀴즈 (단원 형성평가) -->
+    <!-- ======================================================== -->
+    <section id="section-quiz" class="tab-section hidden flex flex-col gap-4 flex-1">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-center">
+        <!-- Left Question Panel -->
+        <div class="flex-1 w-full flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <span id="quizBadge" class="bg-indigo-100 text-indigo-700 text-xs font-extrabold px-3 py-1 rounded-full">
+              QUESTION 1 / 4
+            </span>
+            <div class="flex items-center gap-1 font-bold text-amber-500 text-sm">
+              <span>🏆</span>
+              <span id="quizScoreDisplay">점수: 0점</span>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50/80 rounded-2xl p-5 border border-indigo-100">
+            <span class="text-xs font-bold text-indigo-500 uppercase tracking-wider block mb-1">정비례 OX & 단답 퀴즈</span>
+            <h3 id="quizQuestionText" class="text-base sm:text-lg font-kids text-slate-800 leading-snug">
+              질문이 로딩 중입니다...
+            </h3>
+          </div>
+
+          <!-- Options Grid -->
+          <div id="quizOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- Feedback notification -->
+          <div id="quizAlert" class="min-h-[44px] p-3 rounded-xl bg-slate-100 text-xs text-slate-600 flex items-center gap-2">
+            <span>ℹ️</span>
+            <span>정답이라고 생각되는 보기를 선택해 주세요!</span>
+          </div>
+        </div>
+
+        <!-- Right Quick Info Card -->
+        <div class="w-full md:w-80 bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between self-stretch text-xs">
+          <div>
+            <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-1.5 text-sm">
+              <span>💡</span> 퀴즈 힌트 가이드
+            </h4>
+            <ul class="space-y-2 text-slate-600 leading-relaxed">
+              <li>• <strong>호의 길이</strong>: 중심각 크기에 <span class="text-indigo-600 font-bold">정비례 (○)</span></li>
+              <li>• <strong>부채꼴의 넓이</strong>: 중심각 크기에 <span class="text-emerald-600 font-bold">정비례 (○)</span></li>
+              <li>• <strong>현의 길이</strong>: 중심각 크기에 <span class="text-rose-600 font-bold">정비례하지 않음 (✕)</span></li>
+              <li>• <strong>중심각이 같은 두 부채꼴</strong>: 호의 길이와 넓이, 현의 길이가 모두 같음!</li>
+            </ul>
+          </div>
+          <button onclick="restartQuiz()" class="mt-4 w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition text-xs">
+            퀴즈 다시 시작하기
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Modal Box (replaces alert) -->
+  <div id="appModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all scale-95 opacity-0 duration-200" id="modalCard">
+      <div id="modalIconWrap" class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl mb-4">
+        <span id="modalIcon">✓</span>
+      </div>
+      <h4 id="modalTitle" class="text-lg font-kids text-slate-900 mb-1">정답입니다!</h4>
+      <p id="modalMsg" class="text-xs text-slate-600 mb-5">상세 설명</p>
+      <button onclick="closeAppModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition">
+        확인
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* Global Constants & State (All Audio / Sound Engines Removed) */
+    const CX = 200, CY = 200, R = 160;
+    let currentTab = 'rotate';
+
+    /* Polar Helper Function */
+    function polarToXY(cx, cy, r, angleRad) {
+      return {
+        x: cx + r * Math.cos(angleRad),
+        y: cy + r * Math.sin(angleRad)
+      };
+    }
+
+    let rotateDeg = 0;
+    const TARGET_OVERLAP_DEG = 115;
+    const SECTOR_SPAN_DEG = 45;
+    const BASE_SECTOR1_START = 180;
+    const BASE_SECTOR2_START = 65;
+    let isAutoRotating = false;
+    let rotateAnimId = null;
+    let isRotateConclusionUnlocked = false;
+
+    function renderRotateCanvas() {
+      const fixedLayer = document.getElementById('fixedSectorLayer');
+      const rotLayer = document.getElementById('rotatingSectorLayer');
+      const badgeLayer = document.getElementById('overlapBadgeLayer');
+      if (!fixedLayer || !rotLayer || !badgeLayer) return;
+
+      fixedLayer.innerHTML = '';
+      rotLayer.innerHTML = '';
+      badgeLayer.innerHTML = '';
+
+      const toRad = deg => (deg * Math.PI) / 180;
+
+      // 1. Fixed Sector 1 (기준 부채꼴: 180° ~ 225°)
+      const s1Start = toRad(BASE_SECTOR1_START);
+      const s1End = toRad(BASE_SECTOR1_START + SECTOR_SPAN_DEG);
+      const p1Start = polarToXY(CX, CY, R, s1Start);
+      const p1End = polarToXY(CX, CY, R, s1End);
+
+      const pathSector1 = `M ${CX} ${CY} L ${p1Start.x} ${p1Start.y} A ${R} ${R} 0 0 1 ${p1End.x} ${p1End.y} Z`;
+      fixedLayer.innerHTML = `
+        <path d="${pathSector1}" fill="rgba(244, 63, 94, 0.28)" stroke="#f43f5e" stroke-width="2.5" />
+        <text x="${(CX + p1Start.x + p1End.x)/3 - 10}" y="${(CY + p1Start.y + p1End.y)/3 + 6}" font-size="13" font-weight="bold" fill="#e11d48">부채꼴 1 (45°)</text>
+      `;
+
+      // 2. Rotating Sector 2
+      const currentStartDeg = BASE_SECTOR2_START + rotateDeg;
+      const s2Start = toRad(currentStartDeg);
+      const s2End = toRad(currentStartDeg + SECTOR_SPAN_DEG);
+      const p2Start = polarToXY(CX, CY, R, s2Start);
+      const p2End = polarToXY(CX, CY, R, s2End);
+
+      const isOverlapped = Math.abs(rotateDeg - TARGET_OVERLAP_DEG) < 1.5;
+      const pathSector2 = `M ${CX} ${CY} L ${p2Start.x} ${p2Start.y} A ${R} ${R} 0 0 1 ${p2End.x} ${p2End.y} Z`;
+      const rotColor = isOverlapped ? '#4f46e5' : '#6366f1';
+      const rotFill = isOverlapped ? 'rgba(79, 70, 229, 0.45)' : 'rgba(99, 102, 241, 0.35)';
+
+      rotLayer.innerHTML = `
+        <path d="${pathSector2}" fill="${rotFill}" stroke="${rotColor}" stroke-width="${isOverlapped ? 3.5 : 2.5}" stroke-dasharray="${isOverlapped ? 'none' : '4 2'}" />
+      `;
+
+      if (rotateDeg < TARGET_OVERLAP_DEG - 2) {
+        const arrowR = R * 0.75;
+        const arrowStart = toRad(BASE_SECTOR2_START + SECTOR_SPAN_DEG / 2 + rotateDeg);
+        const arrowEnd = toRad(BASE_SECTOR1_START + SECTOR_SPAN_DEG / 2);
+        const pArr1 = polarToXY(CX, CY, arrowR, arrowStart);
+        const pArr2 = polarToXY(CX, CY, arrowR, arrowEnd);
+        rotLayer.innerHTML += `
+          <path d="M ${pArr1.x} ${pArr1.y} A ${arrowR} ${arrowR} 0 0 1 ${pArr2.x} ${pArr2.y}" fill="none" stroke="#e11d48" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>
+        `;
+      }
+
+      // Update UI cards
+      const statusTitle = document.getElementById('overlapStatusTitle');
+      const cardArc = document.getElementById('checkArcCard');
+      const badgeArc = document.getElementById('checkArcBadge');
+      const cardArea = document.getElementById('checkAreaCard');
+      const badgeArea = document.getElementById('checkAreaBadge');
+
+      const lockBadge = document.getElementById('rotateLockBadge');
+      const lockTitle = document.getElementById('rotateLockTitle');
+      const lockDesc = document.getElementById('rotateLockDesc');
+      const btnUnlock = document.getElementById('btnUnlockRotate');
+      const btnUnlockText = document.getElementById('btnUnlockRotateText');
+
+      if (isOverlapped) {
+        statusTitle.innerHTML = `<span class="text-indigo-600 font-extrabold animate-bounce inline-block">✨ 완벽하게 딱 포개어졌습니다!</span>`;
+        badgeArc.className = 'text-xs font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full';
+        badgeArc.innerHTML = '&check; 호의 길이 일치!';
+        badgeArea.className = 'text-xs font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full';
+        badgeArea.innerHTML = '&check; 부채꼴 넓이 일치!';
+
+        cardArc.className = 'bg-emerald-50 p-2.5 rounded-xl border border-emerald-300 flex items-center justify-between shadow-xs transition';
+        cardArea.className = 'bg-emerald-50 p-2.5 rounded-xl border border-emerald-300 flex items-center justify-between shadow-xs transition';
+
+        badgeLayer.innerHTML = `
+          <g class="animate-pulse">
+            <rect x="120" y="70" width="160" height="32" rx="16" fill="rgba(16, 185, 129, 0.95)" />
+            <text x="200" y="91" font-size="13" font-weight="extrabold" fill="#ffffff" text-anchor="middle">🎯 100% 완전 일치 (합동)</text>
+          </g>
+        `;
+
+        if (!isRotateConclusionUnlocked && btnUnlock) {
+          lockBadge.className = 'text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full animate-bounce';
+          lockBadge.textContent = '포개기 완료! 🔓';
+          lockTitle.innerHTML = '✨ 두 부채꼴이 완전히 포개어졌습니다!';
+          lockDesc.innerHTML = '아래 버튼을 눌러 <strong>두 부채꼴의 호와 넓이에 대한 공식</strong>을 확인하세요.';
+          btnUnlock.disabled = false;
+          btnUnlock.className = 'mt-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition flex items-center gap-1.5 animate-pulse';
+          btnUnlockText.textContent = '핵심 원리 확인하기 🔓';
+        }
+      } else {
+        const percent = Math.round((rotateDeg / TARGET_OVERLAP_DEG) * 100);
+        statusTitle.innerHTML = `회전 진행률: <span class="text-indigo-600 font-bold">${percent}%</span> (포개는 중)`;
+        badgeArc.className = 'text-xs font-extrabold text-slate-400';
+        badgeArc.textContent = '회전하여 포개어보세요';
+        badgeArea.className = 'text-xs font-extrabold text-slate-400';
+        badgeArea.textContent = '회전하여 포개어보세요';
+
+        cardArc.className = 'bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs transition';
+        cardArea.className = 'bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-xs transition';
+
+        if (!isRotateConclusionUnlocked && btnUnlock) {
+          lockBadge.className = 'text-[11px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full';
+          lockBadge.textContent = '포개기 대기 중 🔒';
+          lockTitle.innerHTML = '핵심 원리가 잠겨있어요! 🔒';
+          lockDesc.innerHTML = '왼쪽 슬라이더나 <strong>[빙글 회전하여 포개기]</strong> 버튼으로<br>중심각이 같은 두 부채꼴을 먼저 <strong>100% 포개어 보세요!</strong>';
+          btnUnlock.disabled = true;
+          btnUnlock.className = 'mt-1 px-4 py-2 bg-slate-200 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed transition flex items-center gap-1.5';
+          btnUnlockText.textContent = `완전히 포갠 후 확인 가능 (${percent}%)`;
+        }
+      }
+    }
+
+    function unlockRotateConclusion() {
+      isRotateConclusionUnlocked = true;
+      document.getElementById('rotateLockedBox').classList.add('hidden');
+      document.getElementById('rotateUnlockedBox').classList.remove('hidden');
+      document.getElementById('rotateFooterHint').textContent = '💡 회전하여 완전히 포개어지므로 호의 길이와 넓이가 같습니다!';
+
+      showAppModal(
+        '포개기 완료 & 원리 확인! 🎉',
+        '중심각의 크기가 45°로 같은 두 부채꼴을 회전시키니 완전히 일치(합동)했습니다! 따라서 두 부채꼴의 [호의 길이]와 [넓이]는 각각 서로 같습니다.',
+        true
+      );
+    }
+
+    function setSectorRotation(val) {
+      rotateDeg = parseFloat(val);
+      document.getElementById('rotateDegText').textContent = `${Math.round(rotateDeg)}°`;
+      document.getElementById('rotateSlider').value = rotateDeg;
+      renderRotateCanvas();
+    }
+
+    function autoRotateOverlay() {
+      if (isAutoRotating) {
+        cancelAnimationFrame(rotateAnimId);
+        isAutoRotating = false;
+        document.getElementById('autoRotateBtnText').textContent = '빙글 회전하여 포개기';
+        document.getElementById('autoRotateIcon').textContent = '▶';
+        return;
+      }
+
+      isAutoRotating = true;
+      document.getElementById('autoRotateBtnText').textContent = '일시 정지';
+      document.getElementById('autoRotateIcon').textContent = '⏸';
+
+      if (rotateDeg >= TARGET_OVERLAP_DEG) {
+        rotateDeg = 0;
+      }
+
+      function step() {
+        if (!isAutoRotating) return;
+        rotateDeg += 1.5;
+        if (rotateDeg >= TARGET_OVERLAP_DEG) {
+          rotateDeg = TARGET_OVERLAP_DEG;
+          setSectorRotation(rotateDeg);
+          isAutoRotating = false;
+          document.getElementById('autoRotateBtnText').textContent = '다시 회전하기';
+          document.getElementById('autoRotateIcon').textContent = '↺';
+          return;
+        }
+        setSectorRotation(rotateDeg);
+        rotateAnimId = requestAnimationFrame(step);
+      }
+      rotateAnimId = requestAnimationFrame(step);
+    }
+
+    function resetRotate() {
+      if (isAutoRotating) {
+        cancelAnimationFrame(rotateAnimId);
+        isAutoRotating = false;
+        document.getElementById('autoRotateBtnText').textContent = '빙글 회전하여 포개기';
+        document.getElementById('autoRotateIcon').textContent = '▶';
+      }
+      isRotateConclusionUnlocked = false;
+      const lockedBox = document.getElementById('rotateLockedBox');
+      const unlockedBox = document.getElementById('rotateUnlockedBox');
+      if (lockedBox) lockedBox.classList.remove('hidden');
+      if (unlockedBox) unlockedBox.classList.add('hidden');
+      setSectorRotation(0);
+    }
+
+    function switchTab(tabKey) {
+      currentTab = tabKey;
+
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      const activeSection = document.getElementById(`section-${tabKey}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-50', 'text-indigo-700', 'shadow-sm');
+        btn.classList.add('text-indigo-100');
+      });
+      const activeBtn = document.getElementById(`tab-${tabKey}`);
+      if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-slate-50', 'text-indigo-700', 'shadow-sm');
+        activeBtn.classList.remove('text-indigo-100');
+      }
+
+      if (tabKey === 'chord') {
+        const slider = document.getElementById('chordAngleSlider');
+        if (slider) updateChordSim(slider.value);
+      } else if (tabKey === 'quiz') {
+        renderQuiz();
+      } else if (tabKey === 'equalchord') {
+        const slider = document.getElementById('equalAngleSlider');
+        if (slider) updateEqualChordSim(slider.value);
+      }
+    }
+
+    function showAppModal(title, msg, isSuccess = true) {
+      const modal = document.getElementById('appModal');
+      const card = document.getElementById('modalCard');
+      const iconWrap = document.getElementById('modalIconWrap');
+      const icon = document.getElementById('modalIcon');
+
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMsg').textContent = msg;
+
+      if (isSuccess) {
+        iconWrap.className = 'w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl mb-4';
+        icon.textContent = '✓';
+      } else {
+        iconWrap.className = 'w-16 h-16 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center text-3xl mb-4';
+        icon.textContent = '✕';
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeAppModal() {
+      const modal = document.getElementById('appModal');
+      const card = document.getElementById('modalCard');
+      card.classList.remove('scale-100', 'opacity-100');
+      card.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 150);
+    }
+
+    let selectedSliceCount = 1;
+    const sliceColors = [
+      '#4f46e5', '#6366f1', '#06b6d4', '#10b981',
+      '#84cc16', '#eab308', '#f97316', '#ef4444'
+    ];
+    const sliceLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const exploredSlices = new Set([1]); // Track explored slice numbers
+    let isFoldConclusionUnlocked = false;
+
+    // 기본 1조각(45°)일 때의 기준 예시 숫자
+    const BASE_ARC_CM = 3;   // 호의 길이 3cm
+    const BASE_AREA_CM2 = 6; // 넓이 6cm²
+
+    function renderSlices() {
+      const container = document.getElementById('slicesContainer');
+      const labelLayer = document.getElementById('sliceLabelsContainer');
+      const letterLayer = document.getElementById('circleLetters');
+      if (!container || !letterLayer) return;
+
+      container.innerHTML = '';
+      if (labelLayer) labelLayer.innerHTML = '';
+      letterLayer.innerHTML = '';
+
+      const sliceAngle = (2 * Math.PI) / 8;
+
+      // Draw dashed reference spokes for 8 sectors
+      for (let i = 0; i < 8; i++) {
+        const ang = -Math.PI / 2 + i * sliceAngle;
+        const p = polarToXY(CX, CY, R, ang);
+        container.innerHTML += `
+          <line x1="${CX}" y1="${CY}" x2="${p.x}" y2="${p.y}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3" />
+        `;
+
+        const textPos = polarToXY(CX, CY, R + 18, ang);
+        letterLayer.innerHTML += `
+          <text x="${textPos.x}" y="${textPos.y + 5}" font-size="14" font-weight="bold" fill="#475569" text-anchor="middle">${sliceLabels[i]}</text>
+        `;
+      }
+
+      // Draw active slices
+      for (let i = 0; i < 8; i++) {
+        const startAng = -Math.PI / 2 + i * sliceAngle;
+        const endAng = startAng + sliceAngle;
+        const p1 = polarToXY(CX, CY, R, startAng);
+        const p2 = polarToXY(CX, CY, R, endAng);
+
+        const isSelected = i < selectedSliceCount;
+        const fillColor = isSelected ? sliceColors[i] : '#f1f5f9';
+        const fillOpacity = isSelected ? '0.45' : '0.2';
+        const strokeColor = isSelected ? sliceColors[i] : '#cbd5e1';
+        const strokeWidth = isSelected ? '2.5' : '1';
+
+        const pathData = `M ${CX} ${CY} L ${p1.x} ${p1.y} A ${R} ${R} 0 0 1 ${p2.x} ${p2.y} Z`;
+
+        const sliceG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        sliceG.setAttribute('class', 'pie-piece');
+        sliceG.setAttribute('onclick', `setSliceCount(${i + 1})`);
+        sliceG.innerHTML = `
+          <path d="${pathData}" fill="${fillColor}" fill-opacity="${fillOpacity}" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+        `;
+
+        if (isSelected) {
+          const midAng = (startAng + endAng) / 2;
+          const labelPos = polarToXY(CX, CY, R * 0.55, midAng);
+          sliceG.innerHTML += `
+            <text x="${labelPos.x}" y="${labelPos.y + 4}" font-size="11" font-weight="extrabold" fill="#1e293b" text-anchor="middle">45°</text>
+          `;
+        }
+
+        container.appendChild(sliceG);
+      }
+
+      // 캔버스 위에 현재 선택된 부채꼴 전체의 호 길이 및 넓이 예시 라벨 렌더링
+      if (labelLayer) {
+        const totalStartAng = -Math.PI / 2;
+        const totalEndAng = totalStartAng + selectedSliceCount * sliceAngle;
+        const midTotalAng = (totalStartAng + totalEndAng) / 2;
+
+        const currentArcCm = BASE_ARC_CM * selectedSliceCount;
+        const currentAreaCm2 = BASE_AREA_CM2 * selectedSliceCount;
+
+        // 호 바깥쪽 라벨 좌표
+        const arcLabelPos = polarToXY(CX, CY, R + 34, midTotalAng);
+        // 부채꼴 면 내부 라벨 좌표
+        const areaLabelPos = polarToXY(CX, CY, R * 0.78, midTotalAng);
+
+        labelLayer.innerHTML = `
+          <!-- 호의 길이 예시 라벨 배지 -->
+          <g class="pointer-events-none drop-shadow-sm">
+            <rect x="${arcLabelPos.x - 38}" y="${arcLabelPos.y - 12}" width="76" height="24" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" />
+            <text x="${arcLabelPos.x}" y="${arcLabelPos.y + 4}" font-size="11" font-weight="extrabold" fill="#b45309" text-anchor="middle">
+              호 ${currentArcCm} cm
+            </text>
+          </g>
+          <!-- 부채꼴 넓이 예시 라벨 배지 -->
+          <g class="pointer-events-none drop-shadow-sm">
+            <rect x="${areaLabelPos.x - 38}" y="${areaLabelPos.y - 12}" width="76" height="24" rx="6" fill="rgba(255, 255, 255, 0.92)" stroke="#10b981" stroke-width="1.5" />
+            <text x="${areaLabelPos.x}" y="${areaLabelPos.y + 4}" font-size="11" font-weight="extrabold" fill="#047857" text-anchor="middle">
+              넓이 ${currentAreaCm2} cm²
+            </text>
+          </g>
+        `;
+      }
+    }
+
+    function setSliceCount(val) {
+      selectedSliceCount = parseInt(val, 10);
+      document.getElementById('sliceSlider').value = selectedSliceCount;
+
+      // Track explored slices
+      exploredSlices.add(selectedSliceCount);
+      updateFoldExplorationProgress();
+
+      const totalAngle = selectedSliceCount * 45;
+      const currentArcCm = BASE_ARC_CM * selectedSliceCount;
+      const currentAreaCm2 = BASE_AREA_CM2 * selectedSliceCount;
+
+      document.getElementById('sliceCountBadge').textContent = `${selectedSliceCount}조각 (${totalAngle}°)`;
+      document.getElementById('kMultiplier').textContent = `${selectedSliceCount}배`;
+
+      document.getElementById('metricAngle').textContent = `${totalAngle}°`;
+      document.getElementById('metricAngleRatio').textContent = `(45° × ${selectedSliceCount} = 360° ÷ 8 × ${selectedSliceCount})`;
+
+      document.getElementById('metricArc').textContent = `${currentArcCm} cm`;
+      document.getElementById('metricArcRatio').innerHTML = `(3 cm × ${selectedSliceCount}배 / ${selectedSliceCount} l)`;
+
+      document.getElementById('metricArea').textContent = `${currentAreaCm2} cm²`;
+      document.getElementById('metricAreaRatio').textContent = `(6 cm² × ${selectedSliceCount}배 / ${selectedSliceCount} S)`;
+
+      renderSlices();
+    }
+
+    function updateFoldExplorationProgress() {
+      if (isFoldConclusionUnlocked) return;
+
+      const count = exploredSlices.size;
+      const percent = (count / 8) * 100;
+      
+      const badge = document.getElementById('foldProgressBadge');
+      const pBar = document.getElementById('foldProgressBar');
+      const btn = document.getElementById('btnUnlockFold');
+      const btnText = document.getElementById('btnUnlockFoldText');
+      const lockTitle = document.getElementById('foldLockTitle');
+      const lockDesc = document.getElementById('foldLockDesc');
+
+      badge.textContent = `탐구 진행: ${count} / 8`;
+      pBar.style.width = `${percent}%`;
+
+      if (count >= 8) {
+        badge.className = 'text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full animate-bounce';
+        badge.textContent = '탐구 완료! 🎉';
+        lockTitle.innerHTML = '✨ 8조각 모두 탐구 완료!';
+        lockDesc.innerHTML = '아래 버튼을 눌러 부채꼴의 호와 넓이가 갖는 <strong>정비례의 비밀</strong>을 열어보세요!';
+        btn.disabled = false;
+        btn.className = 'mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition flex items-center gap-1.5 animate-pulse';
+        btnText.textContent = '정비례의 비밀 확인하기 🔓';
+      } else {
+        btnText.textContent = `8조각 모두 탐구 후 확인 가능 (${count}/8)`;
+      }
+    }
+
+    function unlockFoldConclusion() {
+      isFoldConclusionUnlocked = true;
+      
+      document.getElementById('foldLockedBox').classList.add('hidden');
+      document.getElementById('foldUnlockedBox').classList.remove('hidden');
+      document.getElementById('btnRelockFold').classList.remove('hidden');
+      document.getElementById('foldFooterHint').textContent = '💡 중심각, 호의 길이, 넓이가 모두 정비례함을 확인했습니다!';
+
+      showAppModal(
+        '정비례의 비밀 발견! 🎉',
+        '8개의 부채꼴을 모두 탐구하셨네요! 중심각이 2배, 3배, 4배... 커질 때 호의 길이와 부채꼴의 넓이도 정확히 2배, 3배, 4배...로 똑같이 커지는 [정비례] 성질을 확인했습니다.',
+        true
+      );
+    }
+
+    function relockFoldConclusion() {
+      isFoldConclusionUnlocked = false;
+      exploredSlices.clear();
+      exploredSlices.add(1);
+      selectedSliceCount = 1;
+
+      document.getElementById('foldLockedBox').classList.remove('hidden');
+      document.getElementById('foldUnlockedBox').classList.add('hidden');
+      document.getElementById('btnRelockFold').classList.add('hidden');
+      document.getElementById('foldFooterHint').textContent = '슬라이더를 올리거나 조각을 눌러 8조각까지 모두 채워보세요!';
+
+      updateFoldExplorationProgress();
+      setSliceCount(1);
+    }
+
+    function changeSlice(delta) {
+      let target = selectedSliceCount + delta;
+      if (target >= 1 && target <= 8) {
+        setSliceCount(target);
+      }
+    }
+
+    function resetSlices() {
+      setSliceCount(1);
+    }
+
+    /* ========================================================== */
+    /* CHAPTER 4: 중심각과 현의 관계 탐구 로직 (신설 및 2번 모드 강화) */
+    /* ========================================================== */
+    let equalChordAngle = 60;
+    let equalChordMode = 'angleToChord'; // 'angleToChord' or 'chordToAngle'
+    let isEqualOverlapActive = false;
+    let isAngleAutoChanging = false;
+    let angleChangeAnimId = null;
+
+    function toggleAngleAutoChange() {
+      const btn = document.getElementById('btnAutoAngleChange');
+      const icon = document.getElementById('autoAngleIcon');
+      const text = document.getElementById('autoAngleText');
+
+      if (isAngleAutoChanging) {
+        // 재생 중일 때 클릭 -> 일시 정지
+        cancelAnimationFrame(angleChangeAnimId);
+        isAngleAutoChanging = false;
+        btn.className = equalChordMode === 'angleToChord' 
+          ? 'px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs'
+          : 'px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+        icon.textContent = '▶';
+        text.textContent = equalChordMode === 'angleToChord' ? '각도 변화 계속 재생' : '현 변화 계속 재생';
+        return;
+      }
+
+      // 이미 최대치(90도)에 도달해 있다면 처음(30도)부터 다시 시작
+      if (equalChordAngle >= 90) {
+        equalChordAngle = 30;
+        const slider = document.getElementById('equalAngleSlider');
+        if (slider) slider.value = 30;
+        updateEqualChordSim(30);
+      }
+
+      isAngleAutoChanging = true;
+      btn.className = 'px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs animate-pulse';
+      icon.textContent = '⏸';
+      text.textContent = equalChordMode === 'angleToChord' ? '각도 변화 일시정지' : '현 변화 일시정지';
+
+      function stepAngle() {
+        if (!isAngleAutoChanging) return;
+        equalChordAngle += 0.5;
+
+        // 최대 각도 90도 (최대 현의 길이 14.1cm)에 도달하면 정지
+        if (equalChordAngle >= 90) {
+          equalChordAngle = 90;
+          const slider = document.getElementById('equalAngleSlider');
+          if (slider) slider.value = 90;
+          updateEqualChordSim(90);
+
+          isAngleAutoChanging = false;
+          btn.className = equalChordMode === 'angleToChord' 
+            ? 'px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs'
+            : 'px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+          icon.textContent = '↺';
+          text.textContent = equalChordMode === 'angleToChord' ? '처음부터 다시 재생' : '처음부터 다시 재생';
+          return;
+        }
+
+        const slider = document.getElementById('equalAngleSlider');
+        if (slider) slider.value = Math.round(equalChordAngle);
+        updateEqualChordSim(Math.round(equalChordAngle));
+        angleChangeAnimId = requestAnimationFrame(stepAngle);
+      }
+      angleChangeAnimId = requestAnimationFrame(stepAngle);
+    }
+
+    function setEqualChordMode(mode) {
+      if (isAngleAutoChanging) {
+        toggleAngleAutoChange();
+      }
+      equalChordMode = mode;
+      isEqualOverlapActive = false;
+      const btnA = document.getElementById('btnModeAngle');
+      const btnC = document.getElementById('btnModeChord');
+      const controlTitle = document.getElementById('equalControlTitle');
+      const controlHint = document.getElementById('equalControlHint');
+      const slider = document.getElementById('equalAngleSlider');
+      const ticks = document.getElementById('equalSliderTicks');
+      const btnText = document.getElementById('btnCongruenceText');
+      if (btnText) btnText.textContent = '합동 포개어 확인하기';
+
+      const topIcon = document.getElementById('topValueIcon');
+      const topLabel = document.getElementById('topValueLabel');
+      const topBadgeWrap = document.getElementById('topValueBadgeWrap');
+      const autoBtn = document.getElementById('btnAutoAngleChange');
+      const autoText = document.getElementById('autoAngleText');
+
+      if (mode === 'angleToChord') {
+        if (btnA) btnA.className = 'px-2.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow-2xs transition text-center';
+        if (btnC) btnC.className = 'px-2.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-center';
+        
+        if (topIcon) topIcon.textContent = '📐';
+        if (topLabel) topLabel.textContent = '중심각:';
+        if (topBadgeWrap) topBadgeWrap.className = 'px-2.5 py-0.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700 flex items-center gap-1 shadow-2xs';
+        if (autoBtn) autoBtn.className = 'px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+        if (autoText) autoText.textContent = '각도 자동 변화';
+
+        if (controlTitle) controlTitle.innerHTML = `두 부채꼴의 중심각 크기: <span id="equalAngleLabel" class="text-indigo-600 text-sm font-extrabold">${equalChordAngle}°</span>`;
+        if (controlHint) controlHint.textContent = '슬라이더로 각도를 변경하면 두 현의 길이가 같아집니다';
+        if (slider) {
+          slider.min = "30";
+          slider.max = "90";
+          slider.step = "5";
+          slider.value = equalChordAngle;
+        }
+        if (ticks) ticks.innerHTML = `<span>30°</span><span>45°</span><span>60°</span><span>75°</span><span>90°</span>`;
+
+        showAppModal(
+          '탐구 모드 1: 중심각 ➔ 현 같음 📐➔📏',
+          '두 부채꼴의 중심각(∠AOB = ∠COD)을 먼저 똑같이 맞추면, SAS 합동에 의해 두 현의 길이(AB = CD)도 자동으로 완전히 같아집니다.',
+          true
+        );
+      } else {
+        if (btnC) btnC.className = 'px-2.5 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-2xs transition text-center';
+        if (btnA) btnA.className = 'px-2.5 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-center';
+
+        const curChordLen = (2 * 10 * Math.sin(((equalChordAngle * Math.PI) / 180) / 2)).toFixed(1);
+        if (topIcon) topIcon.textContent = '📏';
+        if (topLabel) topLabel.textContent = '현의 길이:';
+        if (topBadgeWrap) topBadgeWrap.className = 'px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-700 flex items-center gap-1 shadow-2xs';
+        if (autoBtn) autoBtn.className = 'px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+        if (autoText) autoText.textContent = '현의 길이 자동 변화';
+
+        if (controlTitle) controlTitle.innerHTML = `두 현의 길이(AB = CD) 조절: <span id="equalAngleLabel" class="text-emerald-600 text-sm font-extrabold">${curChordLen} cm</span>`;
+        if (controlHint) controlHint.textContent = '현의 길이를 직접 늘리거나 줄여보세요! 중심각이 자동으로 일치합니다';
+        if (slider) {
+          slider.min = "30";
+          slider.max = "90";
+          slider.step = "5";
+          slider.value = equalChordAngle;
+        }
+        if (ticks) ticks.innerHTML = `<span>5.2 cm</span><span>7.7 cm</span><span>10.0 cm</span><span>12.2 cm</span><span>14.1 cm</span>`;
+
+        showAppModal(
+          '탐구 모드 2 (역): 현 같음 ➔ 중심각 같음 📏➔📐',
+          '두 현의 길이(현 AB = 현 CD)를 먼저 똑같이 맞추고 움직여보세요! 세 변이 같은 SSS 합동이므로 두 중심각(∠AOB = ∠COD)도 항상 똑같이 따라 움직입니다.',
+          true
+        );
+      }
+      if (slider) {
+        updateEqualChordSim(slider.value);
+      } else {
+        updateEqualChordSim(equalChordAngle);
+      }
+    }
+
+    function toggleChordCongruence() {
+      isEqualOverlapActive = !isEqualOverlapActive;
+      const btnText = document.getElementById('btnCongruenceText');
+      if (isEqualOverlapActive) {
+        btnText.textContent = '원래 위치로 분리하기';
+        const msg = equalChordMode === 'angleToChord'
+          ? '부채꼴 COD를 회전시켜 부채꼴 AOB 위에 올려놓으니 완전히 포개어집니다! (SAS 합동으로 현 AB = 현 CD 일치)'
+          : '길이가 같은 두 현 CD와 AB를 포개어 놓으니 원의 중심각 ∠COD와 ∠AOB도 완전히 하나로 포개어집니다! (SSS 합동으로 중심각 일치)';
+        showAppModal('합동 포개어 확인! 🎯', msg, true);
+      } else {
+        btnText.textContent = '합동 포개어 확인하기';
+      }
+      updateEqualChordSim(equalChordAngle);
+    }
+
+    function updateEqualChordSim(degVal) {
+      equalChordAngle = parseFloat(degVal);
+      const spanRad = (equalChordAngle * Math.PI) / 180;
+      const chordLenCm = (2 * 10 * Math.sin(spanRad / 2)).toFixed(1);
+
+      // 상단 우측 실시간 배지 업데이트 (모드에 따라 중심각 또는 현의 길이 표시)
+      const topBadge = document.getElementById('topAngleLiveBadge');
+      if (topBadge) {
+        if (equalChordMode === 'angleToChord') {
+          topBadge.textContent = `${Math.round(equalChordAngle)}°`;
+        } else {
+          topBadge.textContent = `${chordLenCm} cm`;
+        }
+      }
+
+      const angleLabel = document.getElementById('equalAngleLabel');
+      if (angleLabel) {
+        if (equalChordMode === 'angleToChord') {
+          angleLabel.textContent = `${Math.round(equalChordAngle)}°`;
+          angleLabel.className = 'text-indigo-600 text-sm font-extrabold';
+        } else {
+          angleLabel.textContent = `${chordLenCm} cm (중심각 ${Math.round(equalChordAngle)}°)`;
+          angleLabel.className = 'text-emerald-600 text-sm font-extrabold';
+        }
+      }
+      document.querySelectorAll('.curAngText').forEach(el => el.textContent = `${Math.round(equalChordAngle)}°`);
+
+      const layer = document.getElementById('equalChordShapesLayer');
+      if (!layer) return;
+      layer.innerHTML = '';
+
+      const toRad = deg => (deg * Math.PI) / 180;
+
+      // Sector 1: AOB (Start angle 200°)
+      const angA = toRad(200);
+      const angB = angA + spanRad;
+      const ptA = polarToXY(CX, CY, R, angA);
+      const ptB = polarToXY(CX, CY, R, angB);
+
+      // Sector 2: COD (Normally start angle 20°, if overlap active -> rotated onto AOB)
+      const baseAngC = toRad(20);
+      const angC = isEqualOverlapActive ? angA : baseAngC;
+      const angD = angC + spanRad;
+      const ptC = polarToXY(CX, CY, R, angC);
+      const ptD = polarToXY(CX, CY, R, angD);
+
+      const isMode2 = (equalChordMode === 'chordToAngle');
+
+      // Sector AOB
+      const pathAOB = `M ${CX} ${CY} L ${ptA.x} ${ptA.y} A ${R} ${R} 0 0 1 ${ptB.x} ${ptB.y} Z`;
+      layer.innerHTML += `
+        <path d="${pathAOB}" fill="rgba(99, 102, 241, 0.22)" stroke="#4f46e5" stroke-width="2" />
+        <!-- 현 AB 선분 강조 -->
+        <line x1="${ptA.x}" y1="${ptA.y}" x2="${ptB.x}" y2="${ptB.y}" stroke="${isMode2 ? '#2563eb' : '#4f46e5'}" stroke-width="${isMode2 ? '6' : '4.5'}" stroke-linecap="round" />
+        <g class="pointer-events-none">
+          <rect x="${(ptA.x + ptB.x)/2 - 38}" y="${(ptA.y + ptB.y)/2 + 8}" width="76" height="22" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.2" />
+          <text x="${(ptA.x + ptB.x)/2}" y="${(ptA.y + ptB.y)/2 + 23}" font-size="11" font-weight="extrabold" fill="#1d4ed8" text-anchor="middle">현 AB: ${chordLenCm}cm</text>
+        </g>
+      `;
+
+      // Sector COD
+      const pathCOD = `M ${CX} ${CY} L ${ptC.x} ${ptC.y} A ${R} ${R} 0 0 1 ${ptD.x} ${ptD.y} Z`;
+      const codColor = isEqualOverlapActive ? '#d97706' : '#059669';
+      const codDash = isEqualOverlapActive ? 'stroke-dasharray="5 3"' : '';
+      layer.innerHTML += `
+        <path d="${pathCOD}" fill="rgba(16, 185, 129, 0.25)" stroke="${codColor}" stroke-width="2" ${codDash} />
+        <!-- 현 CD 선분 강조 -->
+        <line x1="${ptC.x}" y1="${ptC.y}" x2="${ptD.x}" y2="${ptD.y}" stroke="${codColor}" stroke-width="${isMode2 ? '6' : '4.5'}" stroke-linecap="round" ${codDash} />
+      `;
+
+      if (!isEqualOverlapActive) {
+        layer.innerHTML += `
+          <g class="pointer-events-none">
+            <rect x="${(ptC.x + ptD.x)/2 - 38}" y="${(ptC.y + ptD.y)/2 - 30}" width="76" height="22" rx="6" fill="#ecfdf5" stroke="#10b981" stroke-width="1.2" />
+            <text x="${(ptC.x + ptD.x)/2}" y="${(ptC.y + ptD.y)/2 - 15}" font-size="11" font-weight="extrabold" fill="#047857" text-anchor="middle">현 CD: ${chordLenCm}cm</text>
+          </g>
+        `;
+      }
+
+      // Angle indicator arcs at center O
+      const pArcA1 = polarToXY(CX, CY, 42, angA);
+      const pArcA2 = polarToXY(CX, CY, 42, angB);
+      layer.innerHTML += `
+        <path d="M ${pArcA1.x} ${pArcA1.y} A 42 42 0 0 1 ${pArcA2.x} ${pArcA2.y}" fill="none" stroke="#4f46e5" stroke-width="2.5" />
+        <text x="${CX + 58 * Math.cos((angA + angB)/2)}" y="${CY + 58 * Math.sin((angA + angB)/2) + 4}" font-size="12" font-weight="bold" fill="#4338ca" text-anchor="middle">${equalChordAngle}°</text>
+      `;
+
+      if (!isEqualOverlapActive) {
+        const pArcC1 = polarToXY(CX, CY, 42, angC);
+        const pArcC2 = polarToXY(CX, CY, 42, angD);
+        layer.innerHTML += `
+          <path d="M ${pArcC1.x} ${pArcC1.y} A 42 42 0 0 1 ${pArcC2.x} ${pArcC2.y}" fill="none" stroke="#059669" stroke-width="2.5" />
+          <text x="${CX + 58 * Math.cos((angC + angD)/2)}" y="${CY + 58 * Math.sin((angC + angD)/2) + 4}" font-size="12" font-weight="bold" fill="#047857" text-anchor="middle">${equalChordAngle}°</text>
+        `;
+      }
+
+      // 2번 모드일 때: 현의 길이가 같음(전제조건)을 알리는 연결 애니메이션 가이드 표시
+      if (isMode2 && !isEqualOverlapActive) {
+        layer.innerHTML += `
+          <!-- 두 현의 길이가 같음을 직관적으로 보여주는 비교 배지 -->
+          <g class="pointer-events-none animate-pulse">
+            <rect x="120" y="65" width="160" height="30" rx="15" fill="rgba(5, 150, 105, 0.92)" />
+            <text x="200" y="85" font-size="12" font-weight="extrabold" fill="#ffffff" text-anchor="middle">📏 현 AB ＝ 현 CD (${chordLenCm}cm)</text>
+          </g>
+        `;
+      }
+
+      // Point Dots & Labels
+      const pts = [
+        { label: 'A', pt: ptA, col: '#4f46e5' },
+        { label: 'B', pt: ptB, col: '#4f46e5' },
+        { label: 'C', pt: ptC, col: '#059669' },
+        { label: 'D', pt: ptD, col: '#059669' }
+      ];
+
+      pts.forEach(p => {
+        layer.innerHTML += `
+          <circle cx="${p.pt.x}" cy="${p.pt.y}" r="6.5" fill="${p.col}" stroke="#ffffff" stroke-width="2" />
+          <text x="${p.pt.x + (p.pt.x > CX ? 14 : -14)}" y="${p.pt.y + (p.pt.y > CY ? 16 : -10)}" font-size="15" font-weight="extrabold" fill="#0f172a" text-anchor="middle">${p.label}</text>
+        `;
+      });
+
+      const abVal = document.getElementById('lengthABVal');
+      const cdVal = document.getElementById('lengthCDVal');
+      if (abVal) abVal.textContent = `${chordLenCm} cm`;
+      if (cdVal) cdVal.textContent = `${chordLenCm} cm`;
+    }
+
+    function checkProblem1() {
+      const input = document.getElementById('inputAns1').value.trim();
+      const fb = document.getElementById('probFeedback1');
+      const lockedBox = document.getElementById('probLockedBox1');
+      const unlockedBox = document.getElementById('probUnlockedBox1');
+
+      if (input === '4') {
+        fb.className = 'min-h-[28px] text-xs font-bold text-emerald-600 flex items-center gap-1.5 animate-pulse';
+        fb.innerHTML = '<span>✓</span> 정답입니다! (x = 4 cm)';
+        
+        // Unlock solution & explanation
+        if (lockedBox && unlockedBox) {
+          lockedBox.classList.add('hidden');
+          unlockedBox.classList.remove('hidden');
+        }
+
+        showAppModal('정답입니다! 🎉', '중심각과 호의 길이가 정비례하므로 50° : 150° = x : 12 비례식이 성립합니다. 아래에 공개된 비례식과 이유 설명을 확인해 보세요!', true);
+      } else {
+        fb.className = 'min-h-[28px] text-xs font-bold text-rose-600 flex items-center gap-1.5';
+        fb.innerHTML = '<span>✕</span> 다시 계산해 보세요! (힌트: 150도는 50도의 몇 배일까요?)';
+      }
+    }
+
+    function checkProblem2() {
+      const input = document.getElementById('inputAns2').value.trim();
+      const fb = document.getElementById('probFeedback2');
+      const lockedBox = document.getElementById('probLockedBox2');
+      const unlockedBox = document.getElementById('probUnlockedBox2');
+
+      if (input === '120') {
+        fb.className = 'min-h-[28px] text-xs font-bold text-emerald-600 flex items-center gap-1.5 animate-pulse';
+        fb.innerHTML = '<span>✓</span> 정답입니다! (x = 120°)';
+        
+        // Unlock solution & explanation
+        if (lockedBox && unlockedBox) {
+          lockedBox.classList.add('hidden');
+          unlockedBox.classList.remove('hidden');
+        }
+
+        showAppModal('정답입니다! 🌟', '부채꼴의 넓이도 중심각의 크기에 정비례하므로 30° : x° = 5 cm² : 20 cm² 비례식이 성립합니다. 아래에 공개된 비례식과 이유 설명을 확인해 보세요!', true);
+      } else {
+        fb.className = 'min-h-[28px] text-xs font-bold text-rose-600 flex items-center gap-1.5';
+        fb.innerHTML = '<span>✕</span> 다시 계산해 보세요! (힌트: 20 cm²는 5 cm²의 몇 배일까요?)';
+      }
+    }
+
+    function checkProblem2() {
+      const input = document.getElementById('inputAns2').value.trim();
+      const fb = document.getElementById('probFeedback2');
+      const lockedBox = document.getElementById('probLockedBox2');
+      const unlockedBox = document.getElementById('probUnlockedBox2');
+
+      if (input === '120') {
+        fb.className = 'min-h-[28px] text-xs font-bold text-emerald-600 flex items-center gap-1.5 animate-pulse';
+        fb.innerHTML = '<i class="fa-solid fa-circle-check"></i> 정답입니다! (x = 120°)';
+        
+        // Unlock solution & explanation
+        if (lockedBox && unlockedBox) {
+          lockedBox.classList.add('hidden');
+          unlockedBox.classList.remove('hidden');
+        }
+
+        showAppModal('정답입니다! 🌟', '부채꼴의 넓이도 중심각의 크기에 정비례하므로 30° : x° = 5 cm² : 20 cm² 비례식이 성립합니다. 아래에 공개된 비례식과 이유 설명을 확인해 보세요!', true);
+      } else {
+        fb.className = 'min-h-[28px] text-xs font-bold text-rose-600 flex items-center gap-1.5';
+        fb.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> 다시 계산해 보세요! (힌트: 20 cm²는 5 cm²의 몇 배일까요?)';
+        playAppSound('wrong');
+      }
+    }
+
+    function updateChordSim(degVal) {
+      const singleDeg = parseFloat(degVal);
+      const doubleDeg = singleDeg * 2;
+
+      document.getElementById('chordAngleLabel').textContent = `${singleDeg}°`;
+      document.getElementById('doubleAngleLabel').textContent = `${doubleDeg}°`;
+
+      const layer = document.getElementById('chord-dynamic-layer');
+      if (!layer) return;
+      layer.innerHTML = '';
+
+      const angB = Math.PI / 2;
+      const angA = angB - (singleDeg * Math.PI) / 180;
+      const angC = angB + (singleDeg * Math.PI) / 180;
+
+      const ptB = polarToXY(CX, CY, R, angB);
+      const ptA = polarToXY(CX, CY, R, angA);
+      const ptC = polarToXY(CX, CY, R, angC);
+
+      // Radii lines OA, OB, OC
+      layer.innerHTML += `
+        <line x1="${CX}" y1="${CY}" x2="${ptA.x}" y2="${ptA.y}" stroke="#94a3b8" stroke-width="2" />
+        <line x1="${CX}" y1="${CY}" x2="${ptB.x}" y2="${ptB.y}" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3 3" />
+        <line x1="${CX}" y1="${CY}" x2="${ptC.x}" y2="${ptC.y}" stroke="#94a3b8" stroke-width="2" />
+      `;
+
+      // Angle indicators
+      const pAngleA = polarToXY(CX, CY, 32, angA);
+      const pAngleB = polarToXY(CX, CY, 32, angB);
+      const pAngleC = polarToXY(CX, CY, 32, angC);
+      layer.innerHTML += `
+        <path d="M ${pAngleA.x} ${pAngleA.y} A 32 32 0 0 1 ${pAngleB.x} ${pAngleB.y}" fill="none" stroke="#6366f1" stroke-width="2.5" />
+        <path d="M ${pAngleB.x} ${pAngleB.y} A 32 32 0 0 1 ${pAngleC.x} ${pAngleC.y}" fill="none" stroke="#6366f1" stroke-width="2.5" />
+        <circle cx="${CX - 8}" cy="${CY + 22}" r="2" fill="#6366f1" />
+        <circle cx="${CX + 8}" cy="${CY + 22}" r="2" fill="#6366f1" />
+      `;
+
+      // Chords
+      layer.innerHTML += `
+        <line x1="${ptA.x}" y1="${ptA.y}" x2="${ptB.x}" y2="${ptB.y}" stroke="#3b82f6" stroke-width="3.5" />
+        <line x1="${ptB.x}" y1="${ptB.y}" x2="${ptC.x}" y2="${ptC.y}" stroke="#3b82f6" stroke-width="3.5" />
+        <line x1="${ptA.x}" y1="${ptA.y}" x2="${ptC.x}" y2="${ptC.y}" stroke="#f59e0b" stroke-width="4.5" />
+      `;
+
+      // Arc AC
+      layer.innerHTML += `
+        <path d="M ${ptA.x} ${ptA.y} A ${R} ${R} 0 0 1 ${ptC.x} ${ptC.y}" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round" />
+      `;
+
+      // Point markers
+      const pts = [
+        { label: 'A', pt: ptA, col: '#f59e0b' },
+        { label: 'B', pt: ptB, col: '#3b82f6' },
+        { label: 'C', pt: ptC, col: '#f59e0b' }
+      ];
+
+      pts.forEach(p => {
+        layer.innerHTML += `
+          <circle cx="${p.pt.x}" cy="${p.pt.y}" r="6.5" fill="${p.col}" stroke="#ffffff" stroke-width="2" />
+          <text x="${p.pt.x + (p.pt.x > CX ? 14 : (p.pt.x < CX ? -14 : 0))}" y="${p.pt.y + 18}" font-size="16" font-weight="extrabold" fill="#0f172a" text-anchor="middle">${p.label}</text>
+        `;
+      });
+
+      // Mathematical lengths
+      const radSingle = (singleDeg * Math.PI) / 180;
+      const radDouble = (doubleDeg * Math.PI) / 180;
+      const chordAB = 2 * R * Math.sin(radSingle / 2);
+      const chordAC = 2 * R * Math.sin(radDouble / 2);
+      const chordRatio = (chordAC / chordAB).toFixed(2);
+
+      document.getElementById('compArcVal').textContent = '정확히 2.00 배';
+      document.getElementById('compChordVal').textContent = `${chordRatio} 배 (< 2배)`;
+    }
+
+    /* OX Quiz Handler for Section 4 (생각 넓히기) */
+    function checkChordOX(choice) {
+      const fb = document.getElementById('chordOXFeedback');
+      const conclusionBadge = document.getElementById('chordConclusionBadge');
+      const reasonLocked = document.getElementById('chordReasonLocked');
+      const reasonUnlocked = document.getElementById('chordReasonUnlocked');
+      const btnO = document.getElementById('btnChordO');
+      const btnX = document.getElementById('btnChordX');
+
+      if (choice === 'X') {
+        fb.className = 'min-h-[22px] text-[11px] font-bold text-emerald-700 text-center animate-pulse';
+        fb.innerHTML = '✨ <strong>딩동댕, 정답입니다!</strong> 현의 길이는 2배가 되지 않습니다!';
+
+        btnX.className = 'py-2.5 bg-emerald-100 border-2 border-emerald-500 rounded-xl font-kids text-base text-emerald-800 font-black shadow-sm';
+        btnO.className = 'py-2.5 bg-slate-100 border-2 border-slate-200 rounded-xl font-kids text-base text-slate-400 opacity-60';
+
+        // Unlock conclusion and proof explanation
+        conclusionBadge.classList.remove('hidden');
+        reasonLocked.classList.add('hidden');
+        reasonUnlocked.classList.remove('hidden');
+
+        showAppModal(
+          '정답입니다! 🌟',
+          '현의 길이는 중심각의 크기가 2배가 되어도 2배보다 작아서 정비례하지 않습니다! 아래에 공개된 [왜 2배가 되지 않고 더 작을까요?] 삼각형 부등식 증명을 확인해 보세요.',
+          true
+        );
+      } else {
+        fb.className = 'min-h-[22px] text-[11px] font-bold text-rose-600 text-center animate-shake';
+        fb.innerHTML = '❌ <strong>아쉬워요!</strong> 위의 현의 길이 측정값(1.41~1.53배)을 다시 확인해 보세요!';
+
+        btnO.className = 'py-2.5 bg-rose-50 border-2 border-rose-300 rounded-xl font-kids text-base text-rose-700';
+      }
+    }
+
+    const quizData = [
+      {
+        question: "한 원에서 부채꼴의 중심각의 크기가 3배가 되면 호의 길이는 몇 배가 될까요?",
+        options: [
+          { text: "1.5배", correct: false },
+          { text: "3배", correct: true },
+          { text: "9배", correct: false },
+          { text: "변함없다", correct: false }
+        ],
+        explain: "호의 길이는 중심각의 크기에 정비례하므로 정확히 3배가 됩니다!"
+      },
+      {
+        question: "한 원에서 부채꼴의 중심각의 크기가 2배가 될 때, '현의 길이'도 2배가 된다. (O / X)",
+        options: [
+          { text: "O (맞다)", correct: false },
+          { text: "X (아니다, 2배보다 작다)", correct: true }
+        ],
+        explain: "삼각형의 두 변의 합 성질 때문에 중심각이 2배가 되어도 현의 길이는 2배보다 항상 짧아 정비례하지 않습니다."
+      },
+      {
+        question: "중심각의 크기가 40°인 부채꼴의 넓이가 6 cm²일 때, 중심각이 120°인 부채꼴의 넓이는?",
+        options: [
+          { text: "12 cm²", correct: false },
+          { text: "18 cm²", correct: true },
+          { text: "24 cm²", correct: false },
+          { text: "36 cm²", correct: false }
+        ],
+        explain: "중심각이 40°에서 120°로 3배 늘어났으므로 넓이도 6 × 3 = 18 cm²가 됩니다."
+      },
+      {
+        question: "한 원에서 중심각의 크기가 서로 같은 두 부채꼴에 대한 설명으로 옳은 것은?",
+        options: [
+          { text: "호의 길이와 넓이, 현의 길이가 모두 같다", correct: true },
+          { text: "호의 길이는 같지만 넓이는 다르다", correct: false },
+          { text: "현의 길이만 같다", correct: false },
+          { text: "포갤 수 없다", correct: false }
+        ],
+        explain: "중심각의 크기가 같은 두 부채꼴은 완전히 합동이므로 호의 길이, 넓이, 현의 길이가 모두 같습니다."
+      }
+    ];
+
+    let quizIdx = 0;
+    let quizScore = 0;
+
+    function renderQuiz() {
+      const q = quizData[quizIdx];
+      document.getElementById('quizBadge').textContent = `QUESTION ${quizIdx + 1} / ${quizData.length}`;
+      document.getElementById('quizQuestionText').textContent = q.question;
+      document.getElementById('quizScoreDisplay').textContent = `점수: ${quizScore}점`;
+
+      const alertBox = document.getElementById('quizAlert');
+      alertBox.className = 'min-h-[44px] p-3 rounded-xl bg-slate-100 text-xs text-slate-600 flex items-center gap-2';
+      alertBox.innerHTML = '<span>ℹ️</span><span>알맞은 보기를 골라보세요.</span>';
+
+      const optContainer = document.getElementById('quizOptionsContainer');
+      optContainer.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-400 rounded-xl font-bold text-xs text-left text-slate-700 transition flex items-center justify-between';
+        btn.innerHTML = `<span>${opt.text}</span><span class="text-slate-300">○</span>`;
+        btn.onclick = () => submitQuizAnswer(opt.correct, q.explain);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function submitQuizAnswer(isCorrect, explanation) {
+      const alertBox = document.getElementById('quizAlert');
+      if (isCorrect) {
+        quizScore += 25;
+        document.getElementById('quizScoreDisplay').textContent = `점수: ${quizScore}점`;
+        alertBox.className = 'min-h-[44px] p-3 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-pulse';
+        alertBox.innerHTML = `<span>✓</span><span>정답! ${explanation}</span>`;
+
+        setTimeout(() => {
+          if (quizIdx < quizData.length - 1) {
+            quizIdx++;
+            renderQuiz();
+          } else {
+            showAppModal('퀴즈 마스터 달성! 🎓', `축하합니다! 원과 부채꼴의 정비례 성질을 완벽하게 이해했습니다. (최종 점수: ${quizScore}점)`, true);
+            restartQuiz();
+          }
+        }, 1200);
+      } else {
+        alertBox.className = 'min-h-[44px] p-3 rounded-xl bg-rose-100 text-rose-800 text-xs font-bold flex items-center gap-2';
+        alertBox.innerHTML = `<span>✕</span><span>아쉬워요! 다시 한 번 생각해 보세요.</span>`;
+      }
+    }
+
+    function restartQuiz() {
+      quizIdx = 0;
+      quizScore = 0;
+      renderQuiz();
+    }
+
+    window.addEventListener('load', () => {
+      renderRotateCanvas();
+      renderSlices();
+      updateEqualChordSim(60);
+      updateChordSim(45);
+    });
+  </script>
+</body>
+</html>
